@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin-Dashboard</title>
+    <script src="../js/auth.js"></script>
+    <link rel="stylesheet" href="../css/dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+</head>
+<body>
+        <div class="table-responsive">
+        <table id="myTable">
+            <thead>
+                <tr>  
+                    <th>Doctor Id</th>
+                    <th>Doctor Name</th>
+                    <th>Specialization</th>
+                    <th>Location</th>
+                    <th>Experience</th>
+                    <th>Available days</th>
+                    <th>Consulation Fees</th>
+                    <!-- <th>Image-Url</th> -->
+                    <th>Available Time</th>
+                    <th><button class="add_btn" onclick="showAddDoctorForm()">Add Doctor</button></th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+                <!-- Rows will be dynamically inserted here -->
+            </tbody>
+        </table>
+        </div>
+            <div id="pagination">
+            <div id="entriesDisplayDiv">
+                Showing <span id="from"> </span> to <span id="to"></span> out of <span id="totalTableEntries"></span> entries 
+            </div>
+            <div id="pageNumbersContainer">
+                <div id="pageNumbers"></div>
+                <div id="goToPage">Go to Page <input id="pageNumberInput" type="number"><button id="goToPageButton">Confirm</button></div>
+            </div>
+            </div>
+
+            <div id="addDoctorContainer" style="display: none";>
+                <h2>Add Doctor</h2>
+                <form id="addDoctorForm">
+                    <label for="doctorName">Doctor Name</label>
+                    <input type="text" id="name" required>
+            
+                    <label for="specialization">Specialization</label>
+                    <input type="text" id="specialization" required>
+            
+                    <label for="location">Location</label>
+                    <input type="text" id="location" required>
+            
+                    <label for="availableDays">Available Days</label>
+                    <input type="text" id="availableDays" placeholder="e.g., Monday,Tuesday" required>
+            
+                    <label for="availableTime">Available Time</label>
+                    <input type="text" id="availableTime" placeholder="e.g., 10:00 AM - 1:00 PM" required>
+            
+                    <label for="yearOfExp">Years of Experience</label>
+                    <input type="number" id="yearOfExp" required>
+            
+                    <label for="fees">Fees</label>
+                    <input type="number" id="fees" required>
+            
+                    <div class="add-doctor-buttons">
+                        <button type="button" class="add-doctor-btn" onclick="addDoctor()">
+                            <i class="fa-solid fa-user-plus"></i> Add Doctor
+                        </button>
+                        <button type="button" class="cancel-btn" onclick="closeAddDoctor()">
+                            <i class="fa-solid fa-xmark"></i> Cancel
+                        </button>
+                    </div>
+                    
+                </form>
+            </div>
+        </div>
+        
+
+    </body>
+    </html>
+    <script src="../js/dashboard.js"></script>
+</body>
+</html>
