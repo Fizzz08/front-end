@@ -1,8 +1,13 @@
-import BASE_URL from "../js/config.js";
+const BASE_URL = window.location.hostname === "localhost"
+    ? "http://localhost:3000"  // Local Development
+    : "https://chikithsa.netlify.app"; // Netlify Deployment
+
+
 
 async function validateLoginForm(event) {
     event.preventDefault(); 
 
+    // const BASE_URL = "http://localhost:3000";
     const email = document.getElementById("email").value.trim();
     const password = document.getElementById("password").value.trim();
     const errorMessage = document.getElementById("error-message");
@@ -75,6 +80,7 @@ async function validateLoginForm(event) {
         errorMessage.textContent = "An error occurred. Please try again.";
     }
 }
+
 
 
 //registration message handling

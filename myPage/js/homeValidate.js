@@ -1,3 +1,7 @@
+const BASE_URL = window.location.hostname === "localhost"
+    ? "http://localhost:3000"  // Local Development
+    : "https://chikithsa.netlify.app"; // Netlify Deployment
+
 document.addEventListener('DOMContentLoaded', function () {
     console.log("🏠 Home Page Loaded");
     const tkn = localStorage.getItem("token"); 

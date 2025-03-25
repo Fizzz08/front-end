@@ -1,3 +1,7 @@
+const BASE_URL = window.location.hostname === "localhost"
+    ? "http://localhost:3000"  // Local Development
+    : "https://chikithsa.netlify.app"; // Netlify Deployment
+    
 // Constants
 const apiBaseUrl = 'http://localhost:8080/api/v1/doctor';
 const token = localStorage.getItem('token');
