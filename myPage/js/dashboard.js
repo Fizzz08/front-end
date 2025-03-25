@@ -19,7 +19,7 @@ const rowsPerPage = 7;
 async function fetchDoctors() {
     if (!token) {
         alert('Unauthorized access. Please log in again.');
-        window.location.href = BASE_URL + 'myPage/HTML/login.html';
+        window.location.href = BASE_URL + '/myPage/HTML/login.html';
         return;
     }
 

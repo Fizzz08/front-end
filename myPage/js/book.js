@@ -344,7 +344,7 @@ async function confirmBooking() {
 
     if (!tkn) {
         alert('Session expired. Please log in again.');
-        window.location.href = BASE_URL + 'myPage/HTML/login.html';
+        window.location.href = BASE_URL + '/myPage/HTML/login.html';
         return;
     }
 
