@@ -1,3 +1,5 @@
+import BASE_URL from "./config";
+
 async function validateLoginForm(event) {
     event.preventDefault(); 
 
@@ -56,9 +58,9 @@ async function validateLoginForm(event) {
                 sessionStorage.setItem("loggedIn", "true");
                 sessionStorage.setItem('role', data.role);      
                 if (data.role === 'ADMIN') {
-                    window.location.href = 'http://localhost:3000/myPage/HTML/admin-dashboard.html'; 
+                    window.location.href = BASE_URL + 'myPage/HTML/admin-dashboard.html'; 
                 } else {
-                    window.location.href = 'http://localhost:3000/myPage/HTML/Home.html';
+                    window.location.href = BASE_URL + 'myPage/HTML/Home.html';
                 }
                 
             } catch (homeError) {
