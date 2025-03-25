@@ -53,7 +53,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 if (!tkn) {
                     alert('You are not authenticated. Please log in first.');
-                    window.location.href = 'http://127.0.0.1:5501/myPage/HTML/login.html';  // Redirect to login if no token
+                    window.location.href = 'http://localhost:3000/myPage/HTML/login.html';  // Redirect to login if no token
                     return;
                 }
 
@@ -77,12 +77,12 @@ document.addEventListener('DOMContentLoaded', function () {
                 .then(data => {
                     if (data.length === 0) {
                         sessionStorage.removeItem('doctorData');
-                        window.location.href = 'http://127.0.0.1:5501/myPage/HTML/book.html';
+                        window.location.href = 'http://localhost:3000/myPage/HTML/book.html';
                     } else {
                         sessionStorage.setItem('doctorData', JSON.stringify(data));
                         sessionStorage.setItem('searchLocation', location);
                         sessionStorage.setItem('searchSpecialization', specialization);
-                        window.location.href = 'http://127.0.0.1:5501/myPage/HTML/book.html';
+                        window.location.href = 'http://localhost:3000/myPage/HTML/book.html';
                         // window.location.href = `http://localhost:8080/api/bookAppointment/book?location=${encodeURIComponent(location)}&specialization=${encodeURIComponent(specialization)}`;
                     }
                 })
@@ -109,7 +109,7 @@ document.addEventListener("DOMContentLoaded", function () {
             event.preventDefault();
             sessionStorage.setItem("logoutMessage", "Successfully logged out"); // Set message
             localStorage.clear();
-            window.location.href = "http://127.0.0.1:5501/myPage/HTML/login.html"; // Redirect
+            window.location.href = "http://localhost:3000/myPage/HTML/login.html"; // Redirect
         });
     }
 });
