@@ -9,6 +9,39 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 </head>
 <body>
+    
+    
+    <div class="MainContainer">
+        <div class="heading"><h2>Admin Dashboard</h2></div>
+        <div id="searchContainer">
+            <input type="text" id="searchInput" placeholder="Search by Id, Name, Specialization, or Location" onkeyup="filterDoctors()" />
+        </div>
+
+        <div class="SortingContainer">
+            <!-- Sorting Arrows (These apply to all columns, but only the active column will show the arrow) -->
+            <span id="sortOrder" class="sort-arrow" onclick="toggleSortOrder()">
+                <span id="ascArrow" class="active-arrow">&#9650;</span>
+                <span id="descArrow" class="inactive-arrow">&#9660;</span>
+            </span>
+            
+            <!-- Dropdown to select the column for sorting -->
+            <span class="sort-label">Sort By:</span>
+            <select id="sortColumn" class="sort-select" onchange="sortDoctors()">
+                <option value="id">Id</option>
+                <option value="name">Name</option>
+                <option value="specialization">Specialization</option>
+                <option value="yearOfExp">Experience</option>
+                <option value="fees">Fees</option>
+                <option value="location">Location</option>
+                <option value="availableDays">Available Days</option>
+                <option value="availableTime">Available Time</option>                
+            </select> 
+        </div>
+    </div>
+
+    
+        
+    
         <div class="table-responsive">
         <table id="myTable">
             <thead>
@@ -30,14 +63,15 @@
             </tbody>
         </table>
         </div>
+        
             <div id="pagination">
             <div id="entriesDisplayDiv">
                 Showing <span id="from"> </span> to <span id="to"></span> out of <span id="totalTableEntries"></span> entries 
             </div>
-            <div id="pageNumbersContainer">
-                <div id="pageNumbers"></div>
-                <div id="goToPage">Go to Page <input id="pageNumberInput" type="number"><button id="goToPageButton">Confirm</button></div>
-            </div>
+                <div id="pageNumbersContainer">
+                    <div id="pageNumbers"></div>
+                    <div id="goToPage">Go to Page <input id="pageNumberInput" type="number"><button id="goToPageButton">Confirm</button></div>
+                </div>
             </div>
 
             <div id="addDoctorContainer" style="display: none";>

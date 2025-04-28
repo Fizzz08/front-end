@@ -87,9 +87,10 @@ td.available-time {
 
 /* Active Page */
 #pagination a.active {
-    background-color: #4c4a4a;
+    background-color: #271a53;
     color: whitesmoke;
 }
+
 
 /* Pagination Numbers Container */
 #pageNumbersContainer {
@@ -363,4 +364,73 @@ input::-webkit-inner-spin-button {
 
 .edit-btn i, .delete-btn i {
     font-size: 16px;
+}
+
+/* Container for Sort By Feature */
+.SortingContainer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-right: 6px;
+    padding-right: 8px;
+}
+
+/* Sort By Label */
+.sort-label {
+    font-weight: bold;
+    font-style: italic;
+    margin-right: 3px;
+    font-size: 14px;
+}
+
+/* Dropdown Style */
+.sort-select {
+    padding: 4px 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: #fff;
+    cursor: pointer;
+}
+
+/* Arrow Icons */
+.sort-arrow {
+    cursor: pointer;
+    padding: 0 4px;
+}
+
+.sort-arrow:hover {
+    color: #007bff;
+}
+
+.active-arrow {
+    color: #007bff;
+    font-weight: bold;
+}
+
+.inactive-arrow {
+    color: #bbb;
+}
+
+
+#searchInput {
+    height: 26px;
+    width: 300px;
+    padding: 5px;
+    padding-left: 10px;
+    margin: 5px 0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.MainContainer{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-end;
+    margin: 0;
+    padding: 0;
+}
+
+.heading{
+    margin-right: 470px;
 }

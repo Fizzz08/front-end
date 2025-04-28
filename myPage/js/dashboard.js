@@ -1,3 +1,4 @@
+
 const BASE_URL = window.location.hostname === "localhost"
     ? "http://localhost:3000"  // Local Development
     : "https://chikithsa.netlify.app"; // Netlify Deployment
@@ -17,7 +18,7 @@ const goToPageButton = document.getElementById('goToPageButton');
 
 let doctors = [];
 let currentPage = 1;
-const rowsPerPage = 7;
+const rowsPerPage = 6;
 
 // Fetch all doctors
 async function fetchDoctors() {
@@ -244,6 +245,7 @@ function updatePagination() {
         button.onclick = () => {
             currentPage = i;
             renderTable();
+            updatePagination(); 
         };
         if (i === currentPage) button.style.fontWeight = 'bold';
         pageNumbersDiv.appendChild(button);
@@ -263,3 +265,198 @@ goToPageButton.onclick = () => {
 
 // Initial fetch on page load
 fetchDoctors();
+
+
+let sortOrder = 'asc'; // Default sort order
+let sortColumn = 'id'; // Default sort column
+
+// Columns that require special sorting logic (time and days)
+const specialColumns = {
+    availableTime: (value) => {
+        // Convert time like '9:00 AM' to a comparable format like Date object or minutes since midnight
+        const timeParts = value.split(' ')[0].split(':');
+        const isPM = value.includes('PM');
+        let hours = parseInt(timeParts[0]);
+        let minutes = parseInt(timeParts[1]);
+
+        // Adjust hours for PM
+        if (isPM && hours !== 12) hours += 12;
+        if (!isPM && hours === 12) hours = 0; // Convert 12 AM to 0 hours
+
+        // Convert to total minutes
+        return hours * 60 + minutes;
+    },
+    availableDays: (value) => {
+        // Order of days (for sorting purposes)
+        const daysOrder = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+
+        if (!value) return 7; // If no day is available, place at the end (Sunday)
+        
+        // For multiple days, sort them by the defined order
+        const days = value.split(',').map(day => day.trim()); // Split by commas and trim spaces
+        const sortedDays = days.map(day => daysOrder.indexOf(day)); // Convert days to their order index
+
+        // Get the earliest day for sorting purposes (next available day)
+        const minDayIndex = Math.min(...sortedDays);
+
+        return minDayIndex; // Return the index of the earliest day for sorting
+    }
+};
+
+// Toggle sort order when clicking the arrows
+function toggleSortOrder() {
+    sortOrder = (sortOrder === 'asc') ? 'desc' : 'asc'; // Toggle between 'asc' and 'desc'
+    updateSortArrows(); // Update the arrows to reflect the current sort order
+    sortDoctors(); // Re-sort the doctors based on the new order
+}
+
+// Handle column selection from the dropdown for sorting
+function sortDoctors() {
+    const numericColumns = ['yearOfExp', 'fees', 'id']; // Columns expected to have numerical values
+    const isNumericColumn = numericColumns.includes(sortColumn);
+
+    // Check if the column has a special sorting logic (time or days)
+    const isSpecialColumn = specialColumns.hasOwnProperty(sortColumn);
+
+    // Sort the doctors array based on the selected column and order
+    doctors.sort((a, b) => {
+        let valueA = a[sortColumn];
+        let valueB = b[sortColumn];
+
+        if (isSpecialColumn) {
+            valueA = specialColumns[sortColumn](valueA); // Apply special sorting logic for time/days
+            valueB = specialColumns[sortColumn](valueB);
+        } else if (isNumericColumn) {
+            valueA = parseFloat(valueA) || 0; // Handle NaN for non-numeric values
+            valueB = parseFloat(valueB) || 0;
+        } else {
+            valueA = valueA.toString().toLowerCase();
+            valueB = valueB.toString().toLowerCase();
+        }
+
+        if (valueA < valueB) return sortOrder === 'asc' ? -1 : 1;
+        if (valueA > valueB) return sortOrder === 'asc' ? 1 : -1;
+        return 0;
+    });
+
+    renderTable(); // Render the sorted table
+}
+
+// Update sorting arrows
+function updateSortArrows() {
+    const ascArrow = document.getElementById('ascArrow');
+    const descArrow = document.getElementById('descArrow');
+
+    // Show the arrows based on the current sort order (ascending or descending)
+    if (sortOrder === 'asc') {
+        ascArrow.classList.add('active-arrow');
+        ascArrow.classList.remove('inactive-arrow');
+        descArrow.classList.add('inactive-arrow');
+        descArrow.classList.remove('active-arrow');
+    } else {
+        descArrow.classList.add('active-arrow');
+        descArrow.classList.remove('inactive-arrow');
+        ascArrow.classList.add('inactive-arrow');
+        ascArrow.classList.remove('active-arrow');
+    }
+}
+
+// Render the sorted table
+function renderTable() {
+    const tableBody = document.getElementById('tableBody');
+    tableBody.innerHTML = ''; // Clear the current table rows
+    const start = (currentPage - 1) * rowsPerPage;
+    const end = Math.min(start + rowsPerPage, doctors.length);
+
+    doctors.slice(start, end).forEach(doctor => {
+        const row = document.createElement('tr');
+        row.setAttribute('id', `row-${doctor.id}`);
+
+        row.innerHTML = `
+            <td data-column="id">${doctor.id}</td>
+            <td><span class="editable" data-field="name">${doctor.name}</span></td>
+            <td><span class="editable" data-field="specialization">${doctor.specialization}</span></td>
+            <td><span class="editable" data-field="location">${doctor.location}</span></td>
+            <td class="centered-column"><span class="editable" data-field="yearOfExp">${doctor.yearOfExp}</span></td>
+            <td><span class="editable" data-field="availableDays">${doctor.availableDays}</span></td>
+            <td><span class="editable" data-field="fees">${doctor.fees}</span></td>
+            <td><span class="editable" data-field="availableTime">${doctor.availableTime}</span></td>
+            <td>
+                <div class="c1">
+                    <button id="editBtn-${doctor.id}" class="edit-btn" onclick="editDoctor('${doctor.id}')">
+                        <i class="fa-solid fa-pen"></i>
+                    </button>
+                    <button class="delete-btn" onclick="deleteDoctor('${doctor.id}')">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </div>
+            </td>
+        `;
+        tableBody.appendChild(row);
+    });
+
+    fromSpan.innerText = start + 1;
+    toSpan.innerText = end;
+}
+
+// Initialize sorting event listener for column selection
+document.getElementById('sortColumn').addEventListener('change', function() {
+    sortColumn = this.value; // Get the selected column from the dropdown
+    sortDoctors(); // Sort the table based on the selected column
+});
+
+
+
+
+// Filter doctors based on search input
+function filterDoctors() {
+    const searchInput = document.getElementById('searchInput').value.toLowerCase();
+
+    // Filter the doctors array based on the search query
+    const filteredDoctors = doctors.filter(doctor => 
+        doctor.id.toString().includes(searchInput) ||                     // Search by ID
+        doctor.name.toLowerCase().includes(searchInput) ||
+        doctor.specialization.toLowerCase().includes(searchInput) ||
+        doctor.location.toLowerCase().includes(searchInput)
+    );
+
+    // Render filtered doctors while maintaining functionality
+    renderFilteredTable(filteredDoctors);
+}
+
+// Render filtered doctors with functional buttons
+function renderFilteredTable(filteredDoctors) {
+    tableBody.innerHTML = '';  // Clear the table
+
+    filteredDoctors.forEach(doctor => {
+        const row = document.createElement('tr');
+        row.setAttribute('id', `row-${doctor.id}`);
+        
+        row.innerHTML = `
+            <td>${doctor.id}</td>
+            <td><span class="editable" data-field="name">${doctor.name}</span></td>
+            <td><span class="editable" data-field="specialization">${doctor.specialization}</span></td>
+            <td><span class="editable" data-field="location">${doctor.location}</span></td>
+            <td class="centered-column"><span class="editable" data-field="yearOfExp">${doctor.yearOfExp}</span></td>
+            <td><span class="editable" data-field="availableDays">${doctor.availableDays}</span></td>
+            <td><span class="editable" data-field="fees">${doctor.fees}</span></td>
+            <td><span class="editable" data-field="availableTime">${doctor.availableTime}</span></td>
+            <td>
+                <div class="c1">
+                    <button id="editBtn-${doctor.id}" class="edit-btn" onclick="editDoctor('${doctor.id}')">
+                        <i class="fa-solid fa-pen"></i>
+                    </button>
+                    <button class="delete-btn" onclick="deleteDoctor('${doctor.id}')">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </div>
+            </td>
+        `;
+        tableBody.appendChild(row);
+    });
+
+    // Update pagination based on filtered results
+    fromSpan.innerText = filteredDoctors.length > 0 ? 1 : 0;
+    toSpan.innerText = filteredDoctors.length;
+    totalEntriesSpan.innerText = filteredDoctors.length;
+}

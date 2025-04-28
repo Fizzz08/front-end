@@ -1,6 +1,3 @@
-
-
-
 const tkn = localStorage.getItem('token');
 window.onload = function () {
     const doctorData = JSON.parse(sessionStorage.getItem('doctorData'));
