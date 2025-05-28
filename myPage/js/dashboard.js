@@ -1,13 +1,10 @@
-
 const BASE_URL = window.location.hostname === "localhost"
-    ? "http://localhost:3000"  // Local Development
-    : "https://chikithsa.netlify.app"; // Netlify Deployment
-    
-// Constants
+    ? "http://localhost:3000"
+    : "https://chikithsa.netlify.app";
+
 const apiBaseUrl = 'http://localhost:8080/api/v1/doctor';
 const token = localStorage.getItem('token');
 
-// DOM Elements
 const tableBody = document.getElementById('tableBody');
 const fromSpan = document.getElementById('from');
 const toSpan = document.getElementById('to');
@@ -18,9 +15,10 @@ const goToPageButton = document.getElementById('goToPageButton');
 
 let doctors = [];
 let currentPage = 1;
-const rowsPerPage = 6;
+let rowsPerPage = 6;
 
-// Fetch all doctors
+
+
 async function fetchDoctors() {
     if (!token) {
         alert('Unauthorized access. Please log in again.');
@@ -47,7 +45,6 @@ async function fetchDoctors() {
     }
 }
 
-// Render table
 function renderTable() {
     tableBody.innerHTML = '';
     const start = (currentPage - 1) * rowsPerPage;
@@ -57,17 +54,15 @@ function renderTable() {
         const row = document.createElement('tr');
         row.setAttribute('id', `row-${doctor.id}`);
 
-        // Inside renderTable function, update data-field attributes to snake_case
         row.innerHTML = `
-        <td>${doctor.id}</td>
+        <td class="leftalign-column">${doctor.id}</td>
         <td><span class="editable" data-field="name">${doctor.name}</span></td>
         <td><span class="editable" data-field="specialization">${doctor.specialization}</span></td>
         <td><span class="editable" data-field="location">${doctor.location}</span></td>
-        <td class="centered-column"><span class="editable" data-field="yearOfExp">${doctor.yearOfExp}</span></td>
-        <td ><span class="editable" data-field="availableDays">${doctor.availableDays}</span></td>
+        <td><span class="editable" data-field="yearOfExp">${doctor.yearOfExp}</span></td>
+        <td><span class="editable" data-field="availableDays">${doctor.availableDays}</span></td>
         <td><span class="editable" data-field="fees">${doctor.fees}</span></td>
         <td><span class="editable" data-field="availableTime">${doctor.availableTime}</span></td>
-
         <td>
             <div class="c1">
             <button id="editBtn-${doctor.id}" class="edit-btn" onclick="editDoctor('${doctor.id}')">
@@ -77,7 +72,6 @@ function renderTable() {
                 <i class="fa-solid fa-trash"></i>
             </button>
             </div>
-
         </td>
         `;
         tableBody.appendChild(row);
@@ -95,9 +89,7 @@ function editDoctor(id) {
 
     if (!row || !editButton || !icon) return;
 
-    // Check current mode using a custom data attribute
     if (editButton.getAttribute("data-mode") !== "editing") {
-        // Switch to edit mode
         row.querySelectorAll('.editable').forEach(span => {
             const value = span.innerText;
             const input = document.createElement('input');
@@ -108,34 +100,103 @@ function editDoctor(id) {
         });
 
         editButton.setAttribute("data-mode", "editing");
-        icon.className = "fa-solid fa-check"; // ✅ Change icon to checkmark
+        icon.className = "fa-solid fa-check";
     } else {
-        saveDoctor(id); // Call save function when clicked again
+        saveDoctor(id);
     }
 }
 
+async function saveDoctor(id) {
+    const row = document.getElementById(`row-${id}`);
+    const editButton = document.getElementById(`editBtn-${id}`);
+    const icon = editButton.querySelector("i");
+
+    const updatedDoctor = { id };
+
+    row.querySelectorAll('input').forEach(input => {
+        const field = input.getAttribute('data-field');
+        let value = input.value.trim();
+
+        if (field === 'yearOfExp' || field === 'fees') {
+            value = parseFloat(value);
+        } else if (field === 'availableTime') {
+            value = value.replace(/\s*,\s*/g, ',');
+        }
+
+        updatedDoctor[field] = value;
+    });
+
+    try {
+        const response = await fetch(`${apiBaseUrl}/${id}`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(updatedDoctor)
+        });
+
+        if (!response.ok) throw new Error(await response.text());
+
+        // Switch back from input to span
+        row.querySelectorAll('input').forEach(input => {
+            const span = document.createElement('span');
+            span.classList.add('editable');
+            span.setAttribute('data-field', input.getAttribute('data-field'));
+            span.innerText = input.value;
+            input.replaceWith(span);
+        });
+
+        // Reset edit button mode and icon
+        editButton.setAttribute("data-mode", "");
+        icon.className = "fa-solid fa-pen";
+
+        alert('Doctor updated successfully!');
+    } catch (err) {
+        console.error('Update error:', err);
+        alert('Failed to update doctor.');
+    }
+}
 
 function showAddDoctorForm() {
     document.getElementById('addDoctorContainer').style.display = 'block';
 }
 
-function closeAddDoctor() {
-    document.getElementById('addDoctorContainer').style.display = 'none';
+function clearAddDoctorForm() {
+  document.getElementById("startTime").value = "";
+  document.getElementById("endTime").value = "";
+  document.getElementById("availableTime").value = "";
 }
 
 
-async function addDoctor() {
-    const newDoctor = {
-        name: document.getElementById('name').value.trim(),
-        specialization: document.getElementById('specialization').value.trim(),
-        location: document.getElementById('location').value.trim(),
-        yearOfExp: parseInt(document.getElementById('yearOfExp').value),
-        availableDays: document.getElementById('availableDays').value.trim(),
-        fees: parseFloat(document.getElementById('fees').value),
-        availableTime: document.getElementById('availableTime').value.trim()
-    };
+function closeAddDoctor() {
+    document.getElementById('addDoctorContainer').style.display = 'none';
+    clearAddDoctorForm();
+}
 
-    console.log('Payload being sent:', newDoctor);
+async function addDoctor() {
+    const doctorName = document.getElementById('name').value.trim();
+    const specialization = document.getElementById('specialization').value.trim();
+    const location = document.getElementById('location').value.trim();
+    const yearOfExp = document.getElementById('yearOfExp').value;
+    const availableDays = document.getElementById('availableDays').value.trim();
+    const fees = document.getElementById('fees').value;
+    const availableTime = document.getElementById('availableTime').value.trim();
+
+    if (!doctorName || !specialization || !location || !yearOfExp || !availableDays || !fees || !availableTime) {
+        alert('Please fill out all fields before adding a doctor.');
+        return;
+    }
+
+    const newDoctor = {
+        name: doctorName,
+        specialization,
+        location,
+        yearOfExp: parseInt(yearOfExp),
+        availableDays,
+        fees: parseFloat(fees),
+        availableTime
+    };
 
     try {
         const response = await fetch(`${apiBaseUrl}/add`, {
@@ -148,7 +209,7 @@ async function addDoctor() {
         });
 
         if (!response.ok) {
-            const errorData = await response.json(); // Parse error response from the server
+            const errorData = await response.json();
             throw new Error(errorData.message || 'Failed to add doctor');
         }
 
@@ -156,75 +217,83 @@ async function addDoctor() {
         closeAddDoctor();
         alert('Doctor added successfully!');
     } catch (err) {
-        console.error('Error adding doctor:', err);
+        console.error('Add doctor error:', err);
         alert(`Failed to add doctor: ${err.message}`);
     }
 }
 
-async function saveDoctor(id) {
-    const row = document.getElementById(`row-${id}`);
-    const editButton = document.getElementById(`editBtn-${id}`);
-
-    // Initialize the object with only `id` first
-    const updatedDoctor = { id };
-
-    // Loop through all inputs in the row to collect updated values
-    row.querySelectorAll('input').forEach(input => {
-        const field = input.getAttribute('data-field');  // This is the field name in frontend (camelCase)
-        let value = input.value.trim();
-
-        // Handle special cases where value needs conversion
-        if (field === 'yearOfExp' || field === 'fees') {
-            value = parseFloat(value); // Convert numeric fields to number
-        } else if (field === 'availableTime') {
-            value = value.replace(',');  // Remove unnecessary spaces around commas
-        }
-
-        // Add field to object directly — keep camelCase (matches backend expectation)
-        updatedDoctor[field] = value;
-    });
-
-    console.log("Payload being sent:", updatedDoctor);
-
-    try {
-        const response = await fetch(`${apiBaseUrl}/${id}`, {
-            method: 'PUT',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(updatedDoctor)
-        });
-
-        if (!response.ok) {
-            const errorText = await response.text();
-            console.error('Server responded with error:', errorText);
-            throw new Error('Failed to update doctor');
-        }
-
-        // Refresh the doctor list to show updated data
-        await fetchDoctors();
-        alert('Doctor updated successfully!');
-    } catch (err) {
-        console.error('Error during update:', err);
-        alert('Failed to update doctor. Please check the input.');
-    }
+const availableTimeInput = document.getElementById("availableTime");
+const startTimeInput = document.getElementById("startTime");
+const endTimeInput = document.getElementById("endTime");
+function convertTo24Hour(timeStr) {
+  const [time, period] = timeStr.split(" ");
+  let [hour] = time.split(":").map(Number);
+  if (period === "PM" && hour !== 12) hour += 12;
+  if (period === "AM" && hour === 12) hour = 0;
+  return hour;
 }
+function updateHiddenField() {
+  const start = startTimeInput.value;
+  const end = endTimeInput.value;
+  if (start && end) {
+    const startHr = convertTo24Hour(start);
+    const endHr = convertTo24Hour(end);
+    if (endHr <= startHr) {
+      alert("End time must be after start time.");
+      availableTimeInput.value = "";
+      return;
+    }
+    availableTimeInput.value = `${start} - ${end}`;
+  }
+}
+flatpickr(startTimeInput, {
+  enableTime: true,
+  noCalendar: true,
+  dateFormat: "h:i K",
+  minuteIncrement: 60,
+  defaultHour: 10,
+  onChange: updateHiddenField
+});
+flatpickr(endTimeInput, {
+  enableTime: true,
+  noCalendar: true,
+  dateFormat: "h:i K",
+  minuteIncrement: 60,
+  defaultHour: 13,
+  onChange: updateHiddenField
+});
 
-// Delete doctor
+
+const selectedDays = new Set();
+
+document.querySelectorAll(".day-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+        const fullDay = btn.getAttribute("data-day");
+        if (selectedDays.has(fullDay)) {
+            selectedDays.delete(fullDay);
+            btn.classList.remove("selected");
+        } else {
+            selectedDays.add(fullDay);
+            btn.classList.add("selected");
+        }
+        // Update the input with full day names
+        document.getElementById("availableDays").value = Array.from(selectedDays).join(", ");
+    });
+});
+
+
 async function deleteDoctor(id) {
     if (!confirm('Are you sure you want to delete this doctor?')) return;
 
     try {
         const response = await fetch(`${apiBaseUrl}/${id}`, {
             method: 'DELETE',
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
+            headers: { 'Authorization': `Bearer ${token}` }
         });
 
         if (!response.ok) throw new Error('Failed to delete doctor');
 
+        alert('Doctor deleted successfully.');
         await fetchDoctors();
     } catch (err) {
         console.error('Error deleting doctor:', err);
@@ -232,180 +301,75 @@ async function deleteDoctor(id) {
     }
 }
 
-// Update pagination UI
 function updatePagination() {
     const totalEntries = doctors.length;
     const totalPages = Math.ceil(totalEntries / rowsPerPage);
     totalEntriesSpan.innerText = totalEntries;
-
     pageNumbersDiv.innerHTML = '';
-    for (let i = 1; i <= totalPages; i++) {
-        const button = document.createElement('button');
-        button.innerText = i;
-        button.onclick = () => {
-            currentPage = i;
+
+    const addPageButton = (number) => {
+        const btn = document.createElement('button');
+        btn.innerText = number;
+        btn.onclick = () => {
+            currentPage = number;
             renderTable();
-            updatePagination(); 
+            updatePagination();
         };
-        if (i === currentPage) button.style.fontWeight = 'bold';
-        pageNumbersDiv.appendChild(button);
-    }
-}
+        if (number === currentPage) btn.style.fontWeight = 'bold';
+        pageNumbersDiv.appendChild(btn);
+    };
 
-// Go to specific page
-goToPageButton.onclick = () => {
-    const page = parseInt(pageNumberInput.value);
-    if (page >= 1 && page <= Math.ceil(doctors.length / rowsPerPage)) {
-        currentPage = page;
-        renderTable();
-    } else {
-        alert('Invalid page number');
-    }
-};
-
-// Initial fetch on page load
-fetchDoctors();
-
-
-let sortOrder = 'asc'; // Default sort order
-let sortColumn = 'id'; // Default sort column
-
-// Columns that require special sorting logic (time and days)
-const specialColumns = {
-    availableTime: (value) => {
-        // Convert time like '9:00 AM' to a comparable format like Date object or minutes since midnight
-        const timeParts = value.split(' ')[0].split(':');
-        const isPM = value.includes('PM');
-        let hours = parseInt(timeParts[0]);
-        let minutes = parseInt(timeParts[1]);
-
-        // Adjust hours for PM
-        if (isPM && hours !== 12) hours += 12;
-        if (!isPM && hours === 12) hours = 0; // Convert 12 AM to 0 hours
-
-        // Convert to total minutes
-        return hours * 60 + minutes;
-    },
-    availableDays: (value) => {
-        // Order of days (for sorting purposes)
-        const daysOrder = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-
-        if (!value) return 7; // If no day is available, place at the end (Sunday)
-        
-        // For multiple days, sort them by the defined order
-        const days = value.split(',').map(day => day.trim()); // Split by commas and trim spaces
-        const sortedDays = days.map(day => daysOrder.indexOf(day)); // Convert days to their order index
-
-        // Get the earliest day for sorting purposes (next available day)
-        const minDayIndex = Math.min(...sortedDays);
-
-        return minDayIndex; // Return the index of the earliest day for sorting
-    }
-};
-
-// Toggle sort order when clicking the arrows
-function toggleSortOrder() {
-    sortOrder = (sortOrder === 'asc') ? 'desc' : 'asc'; // Toggle between 'asc' and 'desc'
-    updateSortArrows(); // Update the arrows to reflect the current sort order
-    sortDoctors(); // Re-sort the doctors based on the new order
-}
-
-// Handle column selection from the dropdown for sorting
-function sortDoctors() {
-    const numericColumns = ['yearOfExp', 'fees', 'id']; // Columns expected to have numerical values
-    const isNumericColumn = numericColumns.includes(sortColumn);
-
-    // Check if the column has a special sorting logic (time or days)
-    const isSpecialColumn = specialColumns.hasOwnProperty(sortColumn);
-
-    // Sort the doctors array based on the selected column and order
-    doctors.sort((a, b) => {
-        let valueA = a[sortColumn];
-        let valueB = b[sortColumn];
-
-        if (isSpecialColumn) {
-            valueA = specialColumns[sortColumn](valueA); // Apply special sorting logic for time/days
-            valueB = specialColumns[sortColumn](valueB);
-        } else if (isNumericColumn) {
-            valueA = parseFloat(valueA) || 0; // Handle NaN for non-numeric values
-            valueB = parseFloat(valueB) || 0;
+    const addIconButton = (iconClass, targetPage, disabled) => {
+        const btn = document.createElement('button');
+        btn.innerHTML = `<i class="${iconClass}"></i>`;
+        if (!disabled) {
+            btn.onclick = () => {
+                currentPage = targetPage;
+                renderTable();
+                updatePagination();
+            };
         } else {
-            valueA = valueA.toString().toLowerCase();
-            valueB = valueB.toString().toLowerCase();
+            btn.disabled = true;
         }
+        pageNumbersDiv.appendChild(btn);
+    };
 
-        if (valueA < valueB) return sortOrder === 'asc' ? -1 : 1;
-        if (valueA > valueB) return sortOrder === 'asc' ? 1 : -1;
-        return 0;
-    });
+    addIconButton('fa-solid fa-angles-left', 1, currentPage === 1);
+    addIconButton('fa-solid fa-angle-left', currentPage - 1, currentPage === 1);
 
-    renderTable(); // Render the sorted table
+    const start = Math.max(1, currentPage - 1);
+    const end = Math.min(totalPages, currentPage + 1);
+
+    for (let i = start; i <= end; i++) addPageButton(i);
+
+    addIconButton('fa-solid fa-angle-right', currentPage + 1, currentPage === totalPages);
+    addIconButton('fa-solid fa-angles-right', totalPages, currentPage === totalPages);
 }
 
-// Update sorting arrows
-function updateSortArrows() {
-    const ascArrow = document.getElementById('ascArrow');
-    const descArrow = document.getElementById('descArrow');
-
-    // Show the arrows based on the current sort order (ascending or descending)
-    if (sortOrder === 'asc') {
-        ascArrow.classList.add('active-arrow');
-        ascArrow.classList.remove('inactive-arrow');
-        descArrow.classList.add('inactive-arrow');
-        descArrow.classList.remove('active-arrow');
+function goToPage() {
+    const pageNumber = parseInt(pageNumberInput.value);
+    if (pageNumber && pageNumber > 0 && pageNumber <= Math.ceil(doctors.length / rowsPerPage)) {
+        currentPage = pageNumber;
+        renderTable();
+        updatePagination();
     } else {
-        descArrow.classList.add('active-arrow');
-        descArrow.classList.remove('inactive-arrow');
-        ascArrow.classList.add('inactive-arrow');
-        ascArrow.classList.remove('active-arrow');
+        alert('Invalid page number!');
     }
 }
+goToPageButton.addEventListener('click', goToPage);
 
-// Render the sorted table
-function renderTable() {
-    const tableBody = document.getElementById('tableBody');
-    tableBody.innerHTML = ''; // Clear the current table rows
-    const start = (currentPage - 1) * rowsPerPage;
-    const end = Math.min(start + rowsPerPage, doctors.length);
-
-    doctors.slice(start, end).forEach(doctor => {
-        const row = document.createElement('tr');
-        row.setAttribute('id', `row-${doctor.id}`);
-
-        row.innerHTML = `
-            <td data-column="id">${doctor.id}</td>
-            <td><span class="editable" data-field="name">${doctor.name}</span></td>
-            <td><span class="editable" data-field="specialization">${doctor.specialization}</span></td>
-            <td><span class="editable" data-field="location">${doctor.location}</span></td>
-            <td class="centered-column"><span class="editable" data-field="yearOfExp">${doctor.yearOfExp}</span></td>
-            <td><span class="editable" data-field="availableDays">${doctor.availableDays}</span></td>
-            <td><span class="editable" data-field="fees">${doctor.fees}</span></td>
-            <td><span class="editable" data-field="availableTime">${doctor.availableTime}</span></td>
-            <td>
-                <div class="c1">
-                    <button id="editBtn-${doctor.id}" class="edit-btn" onclick="editDoctor('${doctor.id}')">
-                        <i class="fa-solid fa-pen"></i>
-                    </button>
-                    <button class="delete-btn" onclick="deleteDoctor('${doctor.id}')">
-                        <i class="fa-solid fa-trash"></i>
-                    </button>
-                </div>
-            </td>
-        `;
-        tableBody.appendChild(row);
-    });
-
-    fromSpan.innerText = start + 1;
-    toSpan.innerText = end;
-}
-
-// Initialize sorting event listener for column selection
-document.getElementById('sortColumn').addEventListener('change', function() {
-    sortColumn = this.value; // Get the selected column from the dropdown
-    sortDoctors(); // Sort the table based on the selected column
+document.getElementById('rowsInput').addEventListener('input', function () {
+    const value = parseInt(this.value);
+    if (!isNaN(value) && value > 0) {
+        rowsPerPage = value;
+        currentPage = 1;
+        renderTable();
+        updatePagination();
+    }
 });
 
-
+// Call initial fetch
+fetchDoctors();
 
 
 // Filter doctors based on search input

@@ -2,25 +2,49 @@ const BASE_URL = window.location.hostname === "localhost"
     ? "http://localhost:3000"  // Local Development
     : "https://chikithsa.netlify.app"; // Netlify Deployment
 
-document.addEventListener('DOMContentLoaded', function () {
+// document.addEventListener('DOMContentLoaded', function () {
+//     console.log("🏠 Home Page Loaded");
+//     const tkn = localStorage.getItem("token"); 
+//     console.log("jwt token :",tkn);
+
+//     fetch('http://localhost:8080/api/userName', {
+//         method: 'GET',
+//         headers: {
+//             'Authorization': 'Bearer ' + tkn
+//         }
+//     })
+//     .then(response => response.text())
+//     .then(username => {
+//         const elements = document.getElementsByClassName('welcome-message');
+//         for (let element of elements) {
+//             element.textContent = username !== 'User not found' ? username : 'Welcome, Guest';
+//         }
+//     })
+//     .catch(error => console.error('Error fetching the username:', error));
+
+
+    document.addEventListener('DOMContentLoaded', function () {
     console.log("🏠 Home Page Loaded");
     const tkn = localStorage.getItem("token"); 
-    console.log("jwt token :",tkn);
+    console.log("jwt token :", tkn);
 
-    fetch('http://localhost:8080/api/username', {
+    fetch('http://localhost:8080/api/userName', {
         method: 'GET',
         headers: {
             'Authorization': 'Bearer ' + tkn
         }
     })
-    .then(response => response.text())
-    .then(username => {
+    .then(response => response.json())
+    .then(data => {
+        const username = data.userName;
         const elements = document.getElementsByClassName('welcome-message');
         for (let element of elements) {
-            element.textContent = username !== 'User not found' ? username : 'Welcome, Guest';
+            element.textContent = username ? username : 'Welcome, Guest';
         }
     })
     .catch(error => console.error('Error fetching the username:', error));
+
+
 
 
 

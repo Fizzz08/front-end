@@ -287,7 +287,7 @@ async function confirmBooking() {
         sessionStorage.setItem('doctorId', doctorData.doctorId);
 
         // Fetch user details (from token)
-        const userResponse = await fetch("http://localhost:8080/api/userId", {
+        const userResponse = await fetch("http://localhost:8080/api/userdetails", {
             headers: {
                 'Authorization': 'Bearer ' + tkn
             }

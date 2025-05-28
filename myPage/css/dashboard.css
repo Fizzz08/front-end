@@ -21,22 +21,28 @@ table {
 th, td {
     padding: 12px 20px;
     border-bottom: 1px solid #00648f;
-    text-align: left;
+    text-align: center;
 }
 
 /* Header Styling */
 th {
     background-color: #3A3335;
     color: white;
+    white-space: nowrap;
 }
 
 /* Rounded Header Corners */
 th:first-child {
     border-top-left-radius: 10px;
+    white-space: nowrap;
 }
 th:last-child {
     border-top-right-radius: 10px;
+    white-space: nowrap;
 }
+
+
+
 
 /* Row Striping */
 tr:nth-child(even) {
@@ -53,6 +59,36 @@ td img {
     border-radius: 50%;
 }
 
+
+.days-container {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+    margin-top: -5px;
+    flex-wrap: wrap;
+}
+.day-btn {
+    padding: 4px 8px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    cursor: pointer;
+    background-color: #f0f0f0;
+    transition: all 0.2s ease;
+}
+.day-btn.selected {
+    background-color: #3498db;
+    color: white;
+    border-color: #1d8ad3;
+}
+#availableDays {
+    width: 100%;
+    padding: 8px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    margin-top: 10px;
+    background-color: #f9f9f9;
+}
+
 /* Available Time Column - Target directly via class */
 td.available-time {
     min-width: 220px;
@@ -65,6 +101,10 @@ td.available-time {
 /* Pagination Container */
 #pagination {
     display: flex;
+    position: relative;
+    bottom: 0;
+    left: 0;
+    right: 0;
     flex-wrap: wrap;
     justify-content: space-between;
     align-items: center;
@@ -101,6 +141,32 @@ td.available-time {
     display: flex;
     padding: 2px;
 }
+
+#pageNumbers button {
+    margin: 0 4px;
+    padding: 5px 10px;
+    border: none;
+    background: #7bc0eb;
+    cursor: pointer;
+    border-radius: 4px;
+}
+#pageNumbers button[disabled] {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+#pageNumbers button i {
+    pointer-events: none;
+}
+
+
+
+#pageNumbers span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 32px; /* match your button height */
+}
+
 
 /* Go To Page Input */
 input[type=number] {
@@ -196,6 +262,16 @@ input::-webkit-inner-spin-button {
     text-align: center;
 }
 
+.leftalign-column {
+    text-align: left;
+}
+
+.sort-arrows {
+  font-size: 0.7em;
+  margin-left: 2px;
+  cursor: pointer;
+}
+
 
 
 #addDoctorContainer {
@@ -215,7 +291,7 @@ input::-webkit-inner-spin-button {
 /* Heading */
 #addDoctorContainer h2 {
     text-align: center;
-    margin-bottom: 15px;
+    margin: 2px;
     font-size: 20px;
     color: #2c3e50;
     border-bottom: 1px solid #e0e0e0;
@@ -241,8 +317,14 @@ input::-webkit-inner-spin-button {
     border-radius: 5px;
     box-sizing: border-box;
     margin-bottom: 10px; /* Reduced spacing between fields */
+    margin-top: 3px;
     outline: none;
     transition: border-color 0.3s;
+}
+
+/* Time picker (add doctor feature) */
+.time-container{
+    margin-top: 2px;
 }
 
 /* Focus effect */
@@ -392,24 +474,6 @@ input::-webkit-inner-spin-button {
     cursor: pointer;
 }
 
-/* Arrow Icons */
-.sort-arrow {
-    cursor: pointer;
-    padding: 0 4px;
-}
-
-.sort-arrow:hover {
-    color: #007bff;
-}
-
-.active-arrow {
-    color: #007bff;
-    font-weight: bold;
-}
-
-.inactive-arrow {
-    color: #bbb;
-}
 
 
 #searchInput {
@@ -433,4 +497,18 @@ input::-webkit-inner-spin-button {
 
 .heading{
     margin-right: 470px;
+}
+
+
+
+.sort-arrow {
+  color: gray;
+  font-size: 0.9em;
+  margin-left: 5px;
+  user-select: none;
+  cursor: pointer;
+}
+
+.sort-arrow.active {
+  color: blue;
 }
